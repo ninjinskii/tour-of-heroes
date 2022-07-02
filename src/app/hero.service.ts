@@ -5,6 +5,7 @@ import { HEROES } from './mock-heroes';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { MessageService } from './message.service';
+import { InMemoryDataService } from './in-memory-data.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,10 +13,11 @@ import { MessageService } from './message.service';
 export class HeroService {
   private heroesUrl = 'api/heroes'; // URL to web api
   private httpOptions = {
-    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
   };
 
   constructor(
+    private dataService: InMemoryDataService,
     private httpClient: HttpClient,
     private messageService: MessageService
   ) {}
@@ -36,10 +38,21 @@ export class HeroService {
   }
 
   updateHero(hero: Hero): Observable<any> {
-    return this.httpClient.put<Hero>(this.heroesUrl, hero, this.httpOptions).pipe(
-      tap((_) => this.log(`updated hero id=${hero.id}`)),
-      catchError(this.handleError<Hero>('updateHero'))
-    );
+    return this.httpClient
+      .put<Hero>(this.heroesUrl, hero, this.httpOptions)
+      .pipe(
+        tap((_) => this.log(`updated hero id=${hero.id}`)),
+        catchError(this.handleError<Hero>('updateHero'))
+      );
+  }
+
+  addHero(hero: Hero): Observable<Hero> {
+    return this.httpClient
+      .post<Hero>(this.heroesUrl, hero, this.httpOptions)
+      .pipe(
+        tap((newHero: Hero) => this.log(`added hero w/ id=${newHero.id}`)),
+        catchError(this.handleError<Hero>('postHero'))
+      );
   }
 
   private log(message: string) {
