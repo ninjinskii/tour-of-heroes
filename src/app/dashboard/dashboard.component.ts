@@ -16,6 +16,10 @@ export class DashboardComponent implements OnInit {
     this.getHeroes();
   }
 
+  log(string: string): void {
+    console.log(string)
+  }
+
   getHeroes(): void {
     this.heroService
       .getHeroes()
